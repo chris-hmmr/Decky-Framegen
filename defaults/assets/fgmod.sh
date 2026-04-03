@@ -133,9 +133,9 @@ if [[ -f "$fgmod_path/update-optiscaler-config.py" ]]; then
   python "$fgmod_path/update-optiscaler-config.py" "$exe_folder_path/OptiScaler.ini"
 fi
 
-# OptiScaler 0.9.0-pre11 can assert on Proton when HQ font auto mode tries to load
-# an external TTF that is not present. Only normalize the default auto value.
-sed -i 's/^UseHQFont[[:space:]]*=[[:space:]]*auto$/UseHQFont=false/' "$exe_folder_path/OptiScaler.ini" || true
+# OptiScaler 0.9.0-pre11+ asserts on Proton when HQ font mode tries to load an
+# external TTF that is not present. Disable for both 'auto' and 'true' values.
+sed -i 's/^UseHQFont[[:space:]]*=[[:space:]]*\(auto\|true\)$/UseHQFont=false/' "$exe_folder_path/OptiScaler.ini" || true
 
 # === ASI Plugins Directory ===
 if [[ -d "$fgmod_path/plugins" ]]; then

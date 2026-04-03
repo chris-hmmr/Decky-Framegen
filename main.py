@@ -138,7 +138,7 @@ class Plugin:
             with open(ini_file, 'r') as f:
                 content = f.read()
 
-            updated_content = re.sub(r'UseHQFont\s*=\s*auto', 'UseHQFont=false', content)
+            updated_content = re.sub(r'UseHQFont\s*=\s*(auto|true)', 'UseHQFont=false', content)
             if updated_content != content:
                 with open(ini_file, 'w') as f:
                     f.write(updated_content)
@@ -169,7 +169,7 @@ class Plugin:
                 updated_content = re.sub(r'Path\s*=\s*auto', 'Path=plugins', updated_content)
 
                 # Disable new HQ font auto mode to avoid missing font assertions on Proton
-                updated_content = re.sub(r'UseHQFont\s*=\s*auto', 'UseHQFont=false', updated_content)
+                updated_content = re.sub(r'UseHQFont\s*=\s*(auto|true)', 'UseHQFont=false', updated_content)
                 
                 with open(ini_file, 'w') as f:
                     f.write(updated_content)
