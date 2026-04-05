@@ -7,7 +7,7 @@ error_exit() {
   echo "❌ $1"
   if [[ -n $STEAM_ZENITY ]]; then
     $STEAM_ZENITY --error --text "$1"
-  else 
+  else
     zenity --error --text "$1" || echo "Zenity failed to display error"
   fi
   logger -t fgmod "❌ ERROR: $1"
@@ -19,13 +19,31 @@ fgmod_path="$HOME/fgmod"
 dll_name="${DLL:-dxgi.dll}"
 preserve_ini="${PRESERVE_INI:-true}"
 
+# === --repatch mode ===
+# Usage: fgmod --repatch /path/to/game/directory
+# Performs a full repatch (fresh ini, all fixes applied) without launching a game.
+# Useful from a terminal in gaming mode or over SSH.
+if [[ "$1" == "--repatch" ]]; then
+  if [[ -z "$2" ]]; then
+    echo "Usage: $0 --repatch /path/to/game/directory"
+    exit 1
+  fi
+  exe_folder_path="$2"
+  preserve_ini="false"
+  REPATCH_MODE=true
+else
+  REPATCH_MODE=false
+fi
+
 # === Resolve Game Path ===
-if [[ "$#" -lt 1 ]]; then
+if [[ "$REPATCH_MODE" == "false" && "$#" -lt 1 ]]; then
   error_exit "Usage: $0 program [program_arguments...]"
 fi
 
 exe_folder_path=""
-if [[ $# -eq 1 ]]; then
+if [[ "$REPATCH_MODE" == "true" ]]; then
+  exe_folder_path="$2"
+elif [[ $# -eq 1 ]]; then
   [[ "$1" == *.exe ]] && exe_folder_path=$(dirname "$1") || exe_folder_path="$1"
 else
   for arg in "$@"; do
@@ -182,7 +200,11 @@ echo "📄 For Heroic, add this as a new wrapper: \"$fgmod_path/fgmod\""
 logger -t fgmod "🟢 Installation completed successfully for $exe_folder_path"
 
 # === Execute original command ===
-if [[ $# -gt 1 ]]; then
+if [[ "$REPATCH_MODE" == "true" ]]; then
+  echo "✅ Repatch complete for $exe_folder_path"
+  logger -t fgmod "🟢 Repatch complete for $exe_folder_path"
+  exit 0
+elif [[ $# -gt 1 ]]; then
   # Log to both file and system journal
   logger -t fgmod "=================="
   logger -t fgmod "Debug Info (Launch Mode):"
